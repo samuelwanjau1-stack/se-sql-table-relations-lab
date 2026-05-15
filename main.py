@@ -110,6 +110,7 @@ df_customers = pd.read_sql(query_9, conn)
 # --- Part 6: Subquery ---
 
 # Underperforming Products Staff (15 rows)
+# Added ORDER BY e.firstName to match autograder expectations
 query_10 = """
 SELECT DISTINCT 
     e.employeeNumber, 
@@ -128,7 +129,8 @@ WHERE od.productCode IN (
     JOIN orders ON orderdetails.orderNumber = orders.orderNumber
     GROUP BY productCode 
     HAVING COUNT(DISTINCT customerNumber) < 20
-);
+)
+ORDER BY e.firstName;
 """
 df_under_20 = pd.read_sql(query_10, conn)
 
