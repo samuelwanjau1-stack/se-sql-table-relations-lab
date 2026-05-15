@@ -6,7 +6,7 @@ conn = sqlite3.connect('data.sqlite')
 
 # --- Part 1: Join and Filter ---
 
-# 1. Boston Employees
+# 1. Boston Employees (2 columns: firstName, lastName)
 query_1 = """
 SELECT firstName, lastName
 FROM employees 
@@ -15,7 +15,7 @@ WHERE city = 'Boston';
 """
 df_boston = pd.read_sql(query_1, conn)
 
-# 2. Ghost Locations (Zero Employees) - REQUIRED NAME: df_zero_emp
+# 2. Ghost Locations - REQUIRED NAME: df_zero_emp
 query_2 = """
 SELECT city, offices.officeCode 
 FROM offices 
@@ -85,7 +85,7 @@ df_product_sold = pd.read_sql(query_7, conn)
 
 # --- Part 5: Multiple Joins ---
 
-# 1. Product Market Reach (109 rows expected)
+# 1. Product Market Reach (109 rows)
 query_8 = """
 SELECT productName, products.productCode, COUNT(DISTINCT customerNumber) AS numpurchasers
 FROM products
@@ -109,10 +109,14 @@ df_customers = pd.read_sql(query_9, conn)
 
 # --- Part 6: Subquery ---
 
-# Underperforming Products Staff (15 rows expected)
-# We join 5 tables and filter by products with < 20 unique customers
+# Underperforming Products Staff (15 rows)
 query_10 = """
-SELECT DISTINCT e.employeeNumber, e.firstName, e.lastName, o.city, o.officeCode
+SELECT DISTINCT 
+    e.employeeNumber, 
+    e.firstName, 
+    e.lastName, 
+    o.city, 
+    o.officeCode
 FROM employees e
 JOIN offices o ON e.officeCode = o.officeCode
 JOIN customers c ON e.employeeNumber = c.salesRepEmployeeNumber
@@ -121,8 +125,9 @@ JOIN orderdetails od ON ord.orderNumber = od.orderNumber
 WHERE od.productCode IN (
     SELECT productCode 
     FROM orderdetails 
+    JOIN orders ON orderdetails.orderNumber = orders.orderNumber
     GROUP BY productCode 
-    HAVING COUNT(DISTINCT orderNumber) < 20
+    HAVING COUNT(DISTINCT customerNumber) < 20
 );
 """
 df_under_20 = pd.read_sql(query_10, conn)
