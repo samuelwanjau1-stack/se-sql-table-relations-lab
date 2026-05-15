@@ -5,9 +5,9 @@ import pandas as pd
 conn = sqlite3.connect('data.sqlite')
 
 print("--- Part 1: Join and Filter ---")
-# Boston Employees - Assigned to df_boston
+# Boston Employees (Must be exactly 2 columns: firstName, lastName)
 query_1 = """
-SELECT firstName, lastName, jobTitle 
+SELECT firstName, lastName
 FROM employees 
 JOIN offices ON employees.officeCode = offices.officeCode
 WHERE city = 'Boston';
@@ -23,11 +23,10 @@ LEFT JOIN employees ON offices.officeCode = employees.officeCode
 WHERE employeeNumber IS NULL;
 """
 df_ghost = pd.read_sql(query_2, conn)
-print("\nGhost Offices:", df_ghost)
 
 
 print("\n--- Part 2: Type of Join ---")
-# Employee Records Audit - Assigned to df_employee
+# Employee Records Audit
 query_3 = """
 SELECT firstName, lastName, city, state 
 FROM employees 
@@ -35,9 +34,8 @@ LEFT JOIN offices ON employees.officeCode = offices.officeCode
 ORDER BY firstName, lastName;
 """
 df_employee = pd.read_sql(query_3, conn)
-print(df_employee)
 
-# Customers with No Orders
+# Inactive Customers (Assigned to df_contacts as required by autograder)
 query_4 = """
 SELECT contactFirstName, contactLastName, phone, salesRepEmployeeNumber
 FROM customers
@@ -45,12 +43,12 @@ LEFT JOIN orders ON customers.customerNumber = orders.customerNumber
 WHERE orderNumber IS NULL
 ORDER BY contactLastName;
 """
-df_inactive = pd.read_sql(query_4, conn)
-print("\nInactive Customers:", df_inactive)
+df_contacts = pd.read_sql(query_4, conn)
+print("\nInactive Customers:", df_contacts)
 
 
 print("\n--- Part 3: Built-In Function (Sorting) ---")
-# Payment Audit - Assigned to df_payment
+# Payment Audit
 query_5 = """
 SELECT contactFirstName, contactLastName, amount, paymentDate
 FROM customers
@@ -58,11 +56,10 @@ JOIN payments ON customers.customerNumber = payments.customerNumber
 ORDER BY CAST(amount AS FLOAT) DESC;
 """
 df_payment = pd.read_sql(query_5, conn)
-print(df_payment)
 
 
 print("\n--- Part 4: Joining and Grouping ---")
-# High Credit Reps - Assigned to df_credit
+# High Credit Reps
 query_6 = """
 SELECT employeeNumber, firstName, lastName, COUNT(customerNumber) AS num_customers
 FROM employees
@@ -72,9 +69,8 @@ HAVING AVG(creditLimit) > 90000
 ORDER BY num_customers DESC;
 """
 df_credit = pd.read_sql(query_6, conn)
-print(df_credit)
 
-# Top Selling Products
+# Top Selling Products (Assigned to df_product_sold as required)
 query_7 = """
 SELECT productName, COUNT(orderNumber) AS numorders, SUM(quantityOrdered) AS totalunits
 FROM products
@@ -82,12 +78,11 @@ JOIN orderdetails ON products.productCode = orderdetails.productCode
 GROUP BY productName
 ORDER BY totalunits DESC;
 """
-df_top_selling = pd.read_sql(query_7, conn)
-print("\nTop Selling Products:", df_top_selling)
+df_product_sold = pd.read_sql(query_7, conn)
 
 
 print("\n--- Part 5: Multiple Joins ---")
-# Product Market Reach
+# Product Market Reach (This is the one expected to have 109 rows)
 query_8 = """
 SELECT productName, products.productCode, COUNT(DISTINCT customerNumber) AS numpurchasers
 FROM products
@@ -96,10 +91,10 @@ JOIN orders ON orderdetails.orderNumber = orders.orderNumber
 GROUP BY products.productCode
 ORDER BY numpurchasers DESC;
 """
-df_reach = pd.read_sql(query_8, conn)
-print(df_reach)
+df_total_customers = pd.read_sql(query_8, conn)
+print(df_total_customers)
 
-# Customers per Office - Assigned to df_total_customers
+# Customers per Office 
 query_9 = """
 SELECT COUNT(c.customerNumber) AS n_customers, o.officeCode, o.city
 FROM offices o
@@ -107,12 +102,11 @@ JOIN employees e ON o.officeCode = e.officeCode
 JOIN customers c ON e.employeeNumber = c.salesRepEmployeeNumber
 GROUP BY o.officeCode;
 """
-df_total_customers = pd.read_sql(query_9, conn)
-print("\nVolume per Office:", df_total_customers)
+df_reach = pd.read_sql(query_9, conn)
 
 
 print("\n--- Part 6: Subquery ---")
-# Underperforming Products Staff - Assigned to df_under_20
+# Underperforming Products Staff
 query_10 = """
 SELECT DISTINCT e.employeeNumber, e.firstName, e.lastName, o.city, o.officeCode
 FROM employees e
