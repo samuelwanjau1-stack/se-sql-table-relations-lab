@@ -5,14 +5,15 @@ import pandas as pd
 conn = sqlite3.connect('data.sqlite')
 
 print("--- Part 1: Join and Filter ---")
-# Boston Employees
+# Boston Employees - Assigned to df_boston
 query_1 = """
 SELECT firstName, lastName, jobTitle 
 FROM employees 
 JOIN offices ON employees.officeCode = offices.officeCode
 WHERE city = 'Boston';
 """
-print(pd.read_sql(query_1, conn))
+df_boston = pd.read_sql(query_1, conn)
+print(df_boston)
 
 # Ghost Locations
 query_2 = """
@@ -21,18 +22,20 @@ FROM offices
 LEFT JOIN employees ON offices.officeCode = employees.officeCode
 WHERE employeeNumber IS NULL;
 """
-print("\nGhost Offices:", pd.read_sql(query_2, conn))
+df_ghost = pd.read_sql(query_2, conn)
+print("\nGhost Offices:", df_ghost)
 
 
 print("\n--- Part 2: Type of Join ---")
-# Employee Records Audit
+# Employee Records Audit - Assigned to df_employee
 query_3 = """
 SELECT firstName, lastName, city, state 
 FROM employees 
 LEFT JOIN offices ON employees.officeCode = offices.officeCode
 ORDER BY firstName, lastName;
 """
-print(pd.read_sql(query_3, conn))
+df_employee = pd.read_sql(query_3, conn)
+print(df_employee)
 
 # Customers with No Orders
 query_4 = """
@@ -42,22 +45,24 @@ LEFT JOIN orders ON customers.customerNumber = orders.customerNumber
 WHERE orderNumber IS NULL
 ORDER BY contactLastName;
 """
-print("\nInactive Customers:", pd.read_sql(query_4, conn))
+df_inactive = pd.read_sql(query_4, conn)
+print("\nInactive Customers:", df_inactive)
 
 
 print("\n--- Part 3: Built-In Function (Sorting) ---")
-# Payment Audit
+# Payment Audit - Assigned to df_payment
 query_5 = """
 SELECT contactFirstName, contactLastName, amount, paymentDate
 FROM customers
 JOIN payments ON customers.customerNumber = payments.customerNumber
 ORDER BY CAST(amount AS FLOAT) DESC;
 """
-print(pd.read_sql(query_5, conn))
+df_payment = pd.read_sql(query_5, conn)
+print(df_payment)
 
 
 print("\n--- Part 4: Joining and Grouping ---")
-# High Credit Reps
+# High Credit Reps - Assigned to df_credit
 query_6 = """
 SELECT employeeNumber, firstName, lastName, COUNT(customerNumber) AS num_customers
 FROM employees
@@ -66,7 +71,8 @@ GROUP BY employeeNumber
 HAVING AVG(creditLimit) > 90000
 ORDER BY num_customers DESC;
 """
-print(pd.read_sql(query_6, conn))
+df_credit = pd.read_sql(query_6, conn)
+print(df_credit)
 
 # Top Selling Products
 query_7 = """
@@ -76,7 +82,8 @@ JOIN orderdetails ON products.productCode = orderdetails.productCode
 GROUP BY productName
 ORDER BY totalunits DESC;
 """
-print("\nTop Selling Products:", pd.read_sql(query_7, conn))
+df_top_selling = pd.read_sql(query_7, conn)
+print("\nTop Selling Products:", df_top_selling)
 
 
 print("\n--- Part 5: Multiple Joins ---")
@@ -89,9 +96,10 @@ JOIN orders ON orderdetails.orderNumber = orders.orderNumber
 GROUP BY products.productCode
 ORDER BY numpurchasers DESC;
 """
-print(pd.read_sql(query_8, conn))
+df_reach = pd.read_sql(query_8, conn)
+print(df_reach)
 
-# Customers per Office (Fixed 'ambiguous column' error)
+# Customers per Office - Assigned to df_total_customers
 query_9 = """
 SELECT COUNT(c.customerNumber) AS n_customers, o.officeCode, o.city
 FROM offices o
@@ -99,11 +107,12 @@ JOIN employees e ON o.officeCode = e.officeCode
 JOIN customers c ON e.employeeNumber = c.salesRepEmployeeNumber
 GROUP BY o.officeCode;
 """
-print("\nVolume per Office:", pd.read_sql(query_9, conn))
+df_total_customers = pd.read_sql(query_9, conn)
+print("\nVolume per Office:", df_total_customers)
 
 
 print("\n--- Part 6: Subquery ---")
-# Underperforming Products Staff
+# Underperforming Products Staff - Assigned to df_under_20
 query_10 = """
 SELECT DISTINCT e.employeeNumber, e.firstName, e.lastName, o.city, o.officeCode
 FROM employees e
@@ -118,7 +127,8 @@ WHERE od.productCode IN (
     HAVING COUNT(DISTINCT orderNumber) < 20
 );
 """
-print(pd.read_sql(query_10, conn))
+df_under_20 = pd.read_sql(query_10, conn)
+print(df_under_20)
 
 # Close the connection
 conn.close()
